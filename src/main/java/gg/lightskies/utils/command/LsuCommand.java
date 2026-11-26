@@ -37,6 +37,10 @@ public final class LsuCommand {
 	public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
 		dispatcher.register(literal("lsu")
 				.executes(ctx -> help(ctx))
+				.then(literal("panel").executes(ctx -> {
+					LightSkiesUtils.requestOpenPanel();
+					return 1;
+				}))
 				.then(literal("hud").executes(ctx -> {
 					LSConfig.get().hud.enabled = !LSConfig.get().hud.enabled;
 					LSConfig.save();
@@ -96,6 +100,7 @@ public final class LsuCommand {
 	private static int help(CommandContext<FabricClientCommandSource> ctx) {
 		String[] lines = {
 				"§b§lLightSkies Utils",
+				"§f/lsu panel §7- open the panel (or bind a key in Controls)",
 				"§f/lsu hud|highlights|page §7- toggles",
 				"§f/lsu mining|bosses|drops [all] §7- summaries",
 				"§f/lsu quest add <max> <name>|remove <name>|clear",

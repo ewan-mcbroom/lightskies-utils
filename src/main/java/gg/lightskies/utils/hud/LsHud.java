@@ -41,7 +41,7 @@ public final class LsHud implements HudElement {
 		// F1 (hidden GUI) is handled by vanilla: HUD elements aren't drawn then.
 		if (!cfg.enabled || !Game.active()) return;
 
-		List<String> lines = buildLines(cfg);
+		List<String> lines = buildLines(cfg, false, Math.max(1, cfg.maxLinesPerSection));
 		if (lines.isEmpty()) return;
 
 		Font font = mc.font;
@@ -60,17 +60,32 @@ public final class LsHud implements HudElement {
 		}
 	}
 
-	private List<String> buildLines(LSConfig.Hud cfg) {
+	/**
+	 * Lines for one page, ignoring the HUD's per-section toggles. Used by the panel screen.
+	 * Runs on the render thread like the HUD, so swapping the page field briefly is safe.
+	 */
+	public List<String> linesFor(Page target, int max) {
+		Page saved = page;
+		page = target;
+		try {
+			List<String> lines = buildLines(LSConfig.get().hud, true, max);
+			lines.remove(0); // the panel draws its own title
+			return lines;
+		} finally {
+			page = saved;
+		}
+	}
+
+	private List<String> buildLines(LSConfig.Hud cfg, boolean all, int max) {
 		List<String> out = new ArrayList<>();
-		int max = Math.max(1, cfg.maxLinesPerSection);
 		out.add("§b§lLightSkies Utils§r §7[" + Fmt.titleCase(page.name().toLowerCase()) + "]");
 
-		if (show(Page.MINING, cfg.showMining)) mining(out);
-		if (show(Page.QUESTS, cfg.showQuests)) quests(out, max);
-		if (show(Page.BOSSES, cfg.showBosses)) bosses(out, max);
-		if (show(Page.LOCATOR, cfg.showRelics)) relics(out, max);
-		if (show(Page.LOCATOR, cfg.showTreasure)) treasure(out, max);
-		if (show(Page.DROPS, cfg.showDrops)) drops(out, max);
+		if (show(Page.MINING, all || cfg.showMining)) mining(out);
+		if (show(Page.QUESTS, all || cfg.showQuests)) quests(out, max);
+		if (show(Page.BOSSES, all || cfg.showBosses)) bosses(out, max);
+		if (show(Page.LOCATOR, all || cfg.showRelics)) relics(out, max);
+		if (show(Page.LOCATOR, all || cfg.showTreasure)) treasure(out, max);
+		if (show(Page.DROPS, all || cfg.showDrops)) drops(out, max);
 		return out;
 	}
 

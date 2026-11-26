@@ -29,6 +29,7 @@ import gg.lightskies.utils.config.DataStore;
 import gg.lightskies.utils.config.LSConfig;
 import gg.lightskies.utils.config.Patterns;
 import gg.lightskies.utils.hud.LsHud;
+import gg.lightskies.utils.hud.PanelScreen;
 import gg.lightskies.utils.render.HighlightRenderer;
 import gg.lightskies.utils.scan.Locator;
 import gg.lightskies.utils.tracker.BossTracker;
@@ -58,6 +59,9 @@ public final class LightSkiesUtils implements ClientModInitializer {
 	private static KeyMapping toggleHudKey;
 	private static KeyMapping toggleHighlightsKey;
 	private static KeyMapping cyclePageKey;
+	private static KeyMapping openPanelKey;
+	/** Set by /lsu panel; opened next tick because the chat screen closes right after a command runs. */
+	private static boolean openPanelNextTick;
 
 	@Override
 	public void onInitializeClient() {
@@ -68,6 +72,8 @@ public final class LightSkiesUtils implements ClientModInitializer {
 		toggleHudKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.toggle_hud", InputConstants.KEY_H, category));
 		toggleHighlightsKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.toggle_highlights", InputConstants.KEY_J, category));
 		cyclePageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.cycle_page", InputConstants.KEY_K, category));
+		// Unbound by default: players pick their own key in Options > Controls > Key Binds > LightSkies Utils.
+		openPanelKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.open_panel", InputConstants.UNKNOWN.getValue(), category));
 
 		HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Identifier.fromNamespaceAndPath(MOD_ID, "hud"), HUD);
 		LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(HighlightRenderer::render);
@@ -107,6 +113,12 @@ public final class LightSkiesUtils implements ClientModInitializer {
 		}
 		while (cyclePageKey.consumeClick()) {
 			HUD.cyclePage();
+		}
+		boolean openPanel = openPanelNextTick;
+		openPanelNextTick = false;
+		while (openPanelKey.consumeClick()) openPanel = true;
+		if (openPanel && mc.player != null && mc.gui.screen() == null) {
+			mc.gui.setScreen(new PanelScreen());
 		}
 
 		if (!Game.active()) return;
@@ -153,6 +165,14 @@ public final class LightSkiesUtils implements ClientModInitializer {
 		} catch (RuntimeException e) {
 			LOGGER.error("Error handling message '{}'", text, e);
 		}
+	}
+
+	public static void requestOpenPanel() {
+		openPanelNextTick = true;
+	}
+
+	public static KeyMapping openPanelKey() {
+		return openPanelKey;
 	}
 
 	public static boolean toggleHighlights() {
