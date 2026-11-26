@@ -1,0 +1,22 @@
+{
+	"schemaVersion": 1,
+	"id": "lightskies_utils",
+	"version": "${version}",
+	"name": "LightSkies Utils",
+	"description": "Client-side utilities for the LightSkies skymining server: mining HUD, quest tracker, relic locator, boss tracker, treasure highlighting and rare-drop summary.",
+	"authors": ["LightSkies Dev Team"],
+	"contact": {
+		"homepage": "https://store.lightskies.gg"
+	},
+	"license": "All-Rights-Reserved",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["gg.lightskies.utils.LightSkiesUtils"]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
