@@ -52,7 +52,7 @@ public final class DropTracker {
 			return;
 		}
 		Map<String, Long> now = rareCounts(mc.player.getInventory());
-		if (mc.screen != null || lastInventory == null) {
+		if (mc.gui.screen() != null || lastInventory == null) {
 			lastInventory = now;
 			return;
 		}

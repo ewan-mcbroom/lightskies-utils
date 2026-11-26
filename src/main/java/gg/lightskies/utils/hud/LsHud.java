@@ -38,7 +38,8 @@ public final class LsHud implements HudElement {
 	public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		Minecraft mc = Game.mc();
 		LSConfig.Hud cfg = LSConfig.get().hud;
-		if (!cfg.enabled || mc.options.hideGui || !Game.active()) return;
+		// F1 (hidden GUI) is handled by vanilla: HUD elements aren't drawn then.
+		if (!cfg.enabled || !Game.active()) return;
 
 		List<String> lines = buildLines(cfg);
 		if (lines.isEmpty()) return;
