@@ -40,19 +40,34 @@ public final class LSConfig {
 	public Hud hud = new Hud();
 
 	public static final class Hud {
+		/** Master switch for all HUD boxes. */
 		public boolean enabled = true;
-		public int x = 4;
-		public int y = 4;
 		/** 0-255 */
 		public int backgroundAlpha = 110;
-		public boolean showMining = true;
-		public boolean showQuests = true;
-		public boolean showBosses = true;
-		public boolean showRelics = true;
-		public boolean showTreasure = true;
-		public boolean showDrops = true;
-		/** Max lines per list section (quests, relics, treasure, drops). */
+		/** Max lines per list box (quests, relics, treasure, drops, bosses). */
 		public int maxLinesPerSection = 5;
+		/**
+		 * One entry per HUD box, keyed by id: mining, quests, bosses, relics, treasure, drops.
+		 * Missing ids are filled with defaults when first drawn. Edit these in-game with the HUD editor.
+		 */
+		public Map<String, Element> elements = new LinkedHashMap<>();
+	}
+
+	public static final class Element {
+		public boolean enabled = true;
+		/** Top-left corner in GUI pixels (same units as the GUI scale). */
+		public int x;
+		public int y;
+		/** 0.5 - 3.0 */
+		public float scale = 1.0f;
+
+		public Element() {
+		}
+
+		public Element(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
 	}
 
 	// ---------------------------------------------------------------- mining

@@ -28,6 +28,7 @@ import gg.lightskies.utils.command.LsuCommand;
 import gg.lightskies.utils.config.DataStore;
 import gg.lightskies.utils.config.LSConfig;
 import gg.lightskies.utils.config.Patterns;
+import gg.lightskies.utils.hud.HudEditorScreen;
 import gg.lightskies.utils.hud.LsHud;
 import gg.lightskies.utils.hud.PanelScreen;
 import gg.lightskies.utils.render.HighlightRenderer;
@@ -58,10 +59,11 @@ public final class LightSkiesUtils implements ClientModInitializer {
 
 	private static KeyMapping toggleHudKey;
 	private static KeyMapping toggleHighlightsKey;
-	private static KeyMapping cyclePageKey;
+	private static KeyMapping editHudKey;
 	private static KeyMapping openPanelKey;
 	/** Set by /lsu panel; opened next tick because the chat screen closes right after a command runs. */
 	private static boolean openPanelNextTick;
+	private static boolean openHudEditorNextTick;
 
 	@Override
 	public void onInitializeClient() {
@@ -71,7 +73,7 @@ public final class LightSkiesUtils implements ClientModInitializer {
 		KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
 		toggleHudKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.toggle_hud", InputConstants.KEY_H, category));
 		toggleHighlightsKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.toggle_highlights", InputConstants.KEY_J, category));
-		cyclePageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.cycle_page", InputConstants.KEY_K, category));
+		editHudKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.edit_hud", InputConstants.UNKNOWN.getValue(), category));
 		// Unbound by default: players pick their own key in Options > Controls > Key Binds > LightSkies Utils.
 		openPanelKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.lightskies_utils.open_panel", InputConstants.UNKNOWN.getValue(), category));
 
@@ -111,8 +113,11 @@ public final class LightSkiesUtils implements ClientModInitializer {
 		while (toggleHighlightsKey.consumeClick()) {
 			Game.say("Highlights " + (toggleHighlights() ? "§aon" : "§coff"));
 		}
-		while (cyclePageKey.consumeClick()) {
-			HUD.cyclePage();
+		boolean editHud = openHudEditorNextTick;
+		openHudEditorNextTick = false;
+		while (editHudKey.consumeClick()) editHud = true;
+		if (editHud && mc.player != null && mc.gui.screen() == null) {
+			mc.gui.setScreen(new HudEditorScreen(null, null));
 		}
 		boolean openPanel = openPanelNextTick;
 		openPanelNextTick = false;
@@ -169,6 +174,10 @@ public final class LightSkiesUtils implements ClientModInitializer {
 
 	public static void requestOpenPanel() {
 		openPanelNextTick = true;
+	}
+
+	public static void requestOpenHudEditor() {
+		openHudEditorNextTick = true;
 	}
 
 	public static KeyMapping openPanelKey() {

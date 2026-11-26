@@ -19,19 +19,31 @@ The mod does nothing unless you're connected to a server whose address contains 
 
 - `H` toggles the HUD
 - `J` toggles the treasure/relic highlights
-- `K` cycles the HUD page: All → Mining → Quests → Bosses → Locator → Drops
+- **Edit HUD layout**: unbound by default. Opens the drag-and-drop HUD editor. `/lsu edithud` also opens it.
 - **Open LightSkies panel**: unbound by default. Set your own key in Options → Controls → Key Binds → LightSkies Utils. Pressing it again closes the panel. `/lsu panel` also opens it.
+
+## HUD layout
+
+The HUD is six separate boxes: Mining, Quests, Bosses, Relics, Treasure and Rare drops. You can show, hide, move and resize each one on its own. Open the editor from Panel → Settings ("Edit HUD layout…", or the **Move** button next to a box), with the Edit HUD layout key, or with `/lsu edithud`:
+
+- **Drag** a box to move it.
+- **Scroll** over a box, or use **− / +**, to resize it (50%–300%). Clicking the size button resets it to 100%.
+- Use the **✔ / ✘** toggle row to show or hide boxes.
+- **Reset layout** puts every box back in its default position and size.
+
+Boxes stay on screen if the window or GUI scale changes. Layout is saved in `hud.elements` in the config.
 
 ## Panel
 
-A full-screen panel with tabs for Overview, Mining, Quests, Bosses, Locator, Drops and Settings. The data tabs show everything, not just the few lines the HUD has room for: per-block mining breakdown, every tracked quest and boss, the nearest 30 relics/treasure, and session plus all-time drop totals. Each data tab has its own reset button, and the Locator tab has Rescan. Scroll with the mouse wheel. The Settings tab has toggles for the HUD and each of its sections, highlights, the relic/treasure finders, sounds, "only on LightSkies" and sidebar reading. It also lets you set the HUD background opacity, lines per section and HUD position. Changes save straight away. The game isn't paused while the panel is open.
+A full-screen panel with tabs for Overview, Mining, Quests, Bosses, Locator, Drops and Settings. The data tabs show everything, not just the few lines the HUD has room for: per-block mining breakdown, every tracked quest and boss, the nearest 30 relics/treasure, and session plus all-time drop totals. Each data tab has its own reset button, and the Locator tab has Rescan. Scroll with the mouse wheel. The Settings tab has an on/off toggle and a **Move** button for each HUD box. It also has toggles for the whole HUD, highlights, the relic/treasure finders, sounds, "only on LightSkies" and sidebar reading, plus HUD background opacity and lines per box. Changes save straight away. The game isn't paused while the panel is open.
 
 ## Commands
 
 ```
 /lsu                          help
 /lsu panel                    open the panel
-/lsu hud | highlights | page  toggles
+/lsu edithud                  open the HUD layout editor
+/lsu hud | highlights         toggles
 /lsu mining | bosses | drops [all]
 /lsu quest add <max> <name> | quest remove <name> | quest clear
 /lsu reset <mining|quests|bosses|drops|relics|all>

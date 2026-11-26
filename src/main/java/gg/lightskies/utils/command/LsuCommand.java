@@ -23,7 +23,7 @@ import gg.lightskies.utils.tracker.SidebarReader;
 import gg.lightskies.utils.util.Fmt;
 
 /**
- * /lsu hud | highlights | page | scan | reload | drops [all] | bosses | mining
+ * /lsu panel | edithud | hud | highlights | scan | reload | drops [all] | bosses | mining
  * /lsu reset <mining|quests|bosses|drops|relics|all>
  * /lsu quest add <max> <name> | quest remove <name> | quest clear
  * /lsu debug           - log every server message to latest.log (for writing regexes)
@@ -47,7 +47,10 @@ public final class LsuCommand {
 					return ok(ctx, "HUD " + onOff(LSConfig.get().hud.enabled));
 				}))
 				.then(literal("highlights").executes(ctx -> ok(ctx, "Highlights " + onOff(LightSkiesUtils.toggleHighlights()))))
-				.then(literal("page").executes(ctx -> ok(ctx, "HUD page: " + LightSkiesUtils.hud().cyclePage())))
+				.then(literal("edithud").executes(ctx -> {
+					LightSkiesUtils.requestOpenHudEditor();
+					return 1;
+				}))
 				.then(literal("scan").executes(ctx -> {
 					LightSkiesUtils.locator().clear();
 					return ok(ctx, "Rescanning nearby blocks");
@@ -101,7 +104,8 @@ public final class LsuCommand {
 		String[] lines = {
 				"§b§lLightSkies Utils",
 				"§f/lsu panel §7- open the panel (or bind a key in Controls)",
-				"§f/lsu hud|highlights|page §7- toggles",
+				"§f/lsu edithud §7- move/resize/hide HUD boxes",
+				"§f/lsu hud|highlights §7- toggles",
 				"§f/lsu mining|bosses|drops [all] §7- summaries",
 				"§f/lsu quest add <max> <name>|remove <name>|clear",
 				"§f/lsu reset <mining|quests|bosses|drops|relics|all>",

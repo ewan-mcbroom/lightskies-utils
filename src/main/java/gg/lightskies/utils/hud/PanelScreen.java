@@ -111,15 +111,34 @@ public final class PanelScreen extends Screen {
 
 	private void initSettings() {
 		LSConfig cfg = LSConfig.get();
+		int colW = 150;
+		int gap = 6;
+		int left = this.width / 2 - colW - gap / 2;
+		int right = left + colW + gap;
+		int y = TOP + 6;
+
+		// HUD boxes: show/hide + "Move" (opens the drag-and-drop editor focused on that box)
+		LsHud.Section[] sections = LsHud.Section.values();
+		for (int i = 0; i < sections.length; i++) {
+			LsHud.Section sec = sections[i];
+			int bx = i % 2 == 0 ? left : right;
+			int by = y + (i / 2) * 22;
+			LSConfig.Element el = LsHud.element(sec);
+			Button t = toggle(sec.title, () -> el.enabled, v -> el.enabled = v);
+			t.setX(bx);
+			t.setY(by);
+			t.setWidth(colW - 48);
+			this.addRenderableWidget(t);
+			this.addRenderableWidget(Button.builder(Component.literal("Move"), btn -> openEditor(sec))
+					.pos(bx + colW - 46, by).size(46, 20).build());
+		}
+		y += ((sections.length + 1) / 2) * 22 + 6;
+
 		List<Button> toggles = new ArrayList<>();
 		toggles.add(toggle("HUD", () -> cfg.hud.enabled, v -> cfg.hud.enabled = v));
+		toggles.add(Button.builder(Component.literal("§eEdit HUD layout…"), btn -> openEditor(null)).size(colW, 20).build());
 		toggles.add(toggle("World highlights", LightSkiesUtils::highlightsOn, v -> LightSkiesUtils.toggleHighlights()));
-		toggles.add(toggle("HUD: mining", () -> cfg.hud.showMining, v -> cfg.hud.showMining = v));
-		toggles.add(toggle("HUD: quests", () -> cfg.hud.showQuests, v -> cfg.hud.showQuests = v));
-		toggles.add(toggle("HUD: bosses", () -> cfg.hud.showBosses, v -> cfg.hud.showBosses = v));
-		toggles.add(toggle("HUD: relics", () -> cfg.hud.showRelics, v -> cfg.hud.showRelics = v));
-		toggles.add(toggle("HUD: treasure", () -> cfg.hud.showTreasure, v -> cfg.hud.showTreasure = v));
-		toggles.add(toggle("HUD: rare drops", () -> cfg.hud.showDrops, v -> cfg.hud.showDrops = v));
+		toggles.add(toggle("Rare drop sound", () -> cfg.drops.alertSound, v -> cfg.drops.alertSound = v));
 		toggles.add(toggle("Relic locator", () -> cfg.relics.enabled, v -> {
 			cfg.relics.enabled = v;
 			LightSkiesUtils.locator().reloadConfig();
@@ -130,50 +149,35 @@ public final class PanelScreen extends Screen {
 		}));
 		toggles.add(toggle("Relic ping", () -> cfg.relics.pingSound, v -> cfg.relics.pingSound = v));
 		toggles.add(toggle("Treasure ping", () -> cfg.treasure.pingSound, v -> cfg.treasure.pingSound = v));
-		toggles.add(toggle("Rare drop sound", () -> cfg.drops.alertSound, v -> cfg.drops.alertSound = v));
 		toggles.add(toggle("Only on LightSkies", () -> cfg.onlyOnLightSkies, v -> cfg.onlyOnLightSkies = v));
 		toggles.add(toggle("Read sidebar quests", () -> cfg.quests.readSidebar, v -> cfg.quests.readSidebar = v));
 		toggles.add(cycle("HUD background", () -> cfg.hud.backgroundAlpha + "", () -> {
 			int[] steps = {0, 60, 110, 170, 230};
 			int next = steps[0];
-			for (int s : steps) {
-				if (s > cfg.hud.backgroundAlpha) {
-					next = s;
+			for (int st : steps) {
+				if (st > cfg.hud.backgroundAlpha) {
+					next = st;
 					break;
 				}
 			}
 			cfg.hud.backgroundAlpha = next;
 		}));
-		toggles.add(cycle("HUD lines/section", () -> cfg.hud.maxLinesPerSection + "", () ->
+		toggles.add(cycle("Lines per box", () -> cfg.hud.maxLinesPerSection + "", () ->
 				cfg.hud.maxLinesPerSection = cfg.hud.maxLinesPerSection >= 10 ? 1 : cfg.hud.maxLinesPerSection + 1));
 
-		// two columns
-		int colW = 150;
-		int gap = 6;
-		int left = this.width / 2 - colW - gap / 2;
-		int y = TOP + 6;
 		for (int i = 0; i < toggles.size(); i++) {
 			Button b = toggles.get(i);
-			b.setX(i % 2 == 0 ? left : left + colW + gap);
+			b.setX(i % 2 == 0 ? left : right);
 			b.setY(y + (i / 2) * 22);
 			b.setWidth(colW);
 			this.addRenderableWidget(b);
 		}
+		contentBottomLimit = y + ((toggles.size() + 1) / 2) * 22 + 2;
+	}
 
-		// HUD position nudgers on the last row
-		int rowY = y + ((toggles.size() + 1) / 2) * 22 + 6;
-		int nx = this.width / 2 - (4 * 44 + 3 * 4) / 2;
-		String[] labels = {"HUD ←", "HUD →", "HUD ↑", "HUD ↓"};
-		int[][] deltas = {{-10, 0}, {10, 0}, {0, -10}, {0, 10}};
-		for (int i = 0; i < 4; i++) {
-			int[] d = deltas[i];
-			this.addRenderableWidget(Button.builder(Component.literal(labels[i]), btn -> {
-				cfg.hud.x = Math.max(0, cfg.hud.x + d[0]);
-				cfg.hud.y = Math.max(0, cfg.hud.y + d[1]);
-				LSConfig.save();
-			}).pos(nx + i * 48, rowY).size(44, 20).build());
-		}
-		contentBottomLimit = rowY + 24;
+	private void openEditor(LsHud.Section focus) {
+		LSConfig.save();
+		this.minecraft.gui.setScreen(new HudEditorScreen(this, focus));
 	}
 
 	// ------------------------------------------------------------------ rendering
@@ -191,8 +195,8 @@ public final class PanelScreen extends Screen {
 
 		if (this.tab == Tab.SETTINGS) {
 			int y = Math.min(contentBottomLimit, this.height - BOTTOM_BAR - 24);
-			graphics.text(this.font, "§7HUD position: " + LSConfig.get().hud.x + ", " + LSConfig.get().hud.y
-					+ "   §7Config: config/lightskies_utils.json", left, y + 4, 0xFFFFFFFF);
+			graphics.text(this.font, "§7Click §fMove§7 to drag a box around and resize it.  Config: config/lightskies_utils.json",
+					left, y + 4, 0xFFFFFFFF);
 			return;
 		}
 
@@ -224,11 +228,15 @@ public final class PanelScreen extends Screen {
 	private List<String> content() {
 		LsHud hud = LightSkiesUtils.hud();
 		return switch (this.tab) {
-			case OVERVIEW -> hud.linesFor(LsHud.Page.ALL, 5);
+			case OVERVIEW -> hud.all(5);
 			case MINING -> mining();
-			case QUESTS -> hud.linesFor(LsHud.Page.QUESTS, 100);
-			case BOSSES -> hud.linesFor(LsHud.Page.BOSSES, 100);
-			case LOCATOR -> hud.linesFor(LsHud.Page.LOCATOR, 30);
+			case QUESTS -> hud.section(LsHud.Section.QUESTS, 100, true);
+			case BOSSES -> hud.section(LsHud.Section.BOSSES, 100, true);
+			case LOCATOR -> {
+				List<String> l = new ArrayList<>(hud.section(LsHud.Section.RELICS, 30, true));
+				l.addAll(hud.section(LsHud.Section.TREASURE, 30, true));
+				yield l;
+			}
 			case DROPS -> drops();
 			case SETTINGS -> List.of();
 		};
@@ -236,7 +244,7 @@ public final class PanelScreen extends Screen {
 
 	private static List<String> mining() {
 		MiningTracker m = LightSkiesUtils.mining();
-		List<String> out = new ArrayList<>(LightSkiesUtils.hud().linesFor(LsHud.Page.MINING, 5));
+		List<String> out = new ArrayList<>(LightSkiesUtils.hud().section(LsHud.Section.MINING, 5, true));
 		out.add(" §fAll-time blocks: §a" + Fmt.compact(DataStore.get().totalBlocksMined));
 		if (!m.perBlock().isEmpty()) {
 			out.add("§6Blocks this session");
@@ -249,7 +257,7 @@ public final class PanelScreen extends Screen {
 
 	private static List<String> drops() {
 		DropTracker d = LightSkiesUtils.drops();
-		List<String> out = new ArrayList<>(LightSkiesUtils.hud().linesFor(LsHud.Page.DROPS, 15));
+		List<String> out = new ArrayList<>(LightSkiesUtils.hud().section(LsHud.Section.DROPS, 15, true));
 		if (!d.session().isEmpty()) {
 			out.add("§6Session totals");
 			d.session().entrySet().stream()
