@@ -80,10 +80,9 @@ public final class LightSkiesUtils implements ClientModInitializer {
 		HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Identifier.fromNamespaceAndPath(MOD_ID, "hud"), HUD);
 		LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(HighlightRenderer::render);
 
-		// Server messages: chat, action bar, titles and subtitles all go through the same handler.
+		// Server messages: chat and action bar here; titles/subtitles via ClientPacketListenerMixin
+		// (Fabric's title events only exist from 26.3). All go through the same handler.
 		ClientReceiveMessageEvents.GAME.register((message, overlay) -> handleServerText(message, overlay ? "actionbar" : "chat"));
-		ClientReceiveMessageEvents.TITLE.register(title -> handleServerText(title, "title"));
-		ClientReceiveMessageEvents.SUBTITLE.register(subtitle -> handleServerText(subtitle, "subtitle"));
 
 		ClientPlayerBlockBreakEvents.AFTER.register((level, player, pos, state) -> {
 			if (!Game.active()) return;

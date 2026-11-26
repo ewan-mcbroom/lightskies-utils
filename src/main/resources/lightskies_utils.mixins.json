@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "gg.lightskies.utils.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "ClientPacketListenerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
