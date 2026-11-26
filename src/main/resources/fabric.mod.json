@@ -14,8 +14,8 @@
 		"client": ["gg.lightskies.utils.LightSkiesUtils"]
 	},
 	"depends": {
-		"fabricloader": ">=0.20.1",
-		"minecraft": "~26.3",
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "${minecraft_dependency}",
 		"java": ">=25",
 		"fabric-api": "*"
 	}

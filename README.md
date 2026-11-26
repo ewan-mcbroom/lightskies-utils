@@ -1,6 +1,11 @@
 # LightSkies Utils
 
-This is a client-side Fabric mod for the LightSkies skymining server (`play.lightskies.gg`). It targets **Minecraft 26.3**, **Fabric Loader 0.20.1+** and **Fabric API 0.166.2+26.3**, and needs Java 25.
+This is a client-side Fabric mod for the LightSkies skymining server (`play.lightskies.gg`). It supports **Minecraft 26.2 and 26.3** from the same source, with one jar per version, and needs Java 25.
+
+| Minecraft | Jar | Fabric Loader | Fabric API |
+|---|---|---|---|
+| 26.3 | `lightskies-utils-1.0.0+mc26.3.jar` | 0.20.1+ | 0.166.2+26.3 |
+| 26.2 | `lightskies-utils-1.0.0+mc26.2.jar` | 0.18.4+ | 0.161.0+26.2 |
 
 ## Features
 
@@ -86,13 +91,18 @@ Other settings to fill in:
 
 ## Building
 
-You need JDK 25. Run:
+You need JDK 25.
 
 ```
-./gradlew build
+./gradlew build                      # Minecraft 26.3 (default)
+./gradlew build -Pmc_target=26.2     # Minecraft 26.2
 ```
 
-The jar ends up in `build/libs/lightskies-utils-1.0.0.jar`. Put it in `.minecraft/mods` next to Fabric API. `./gradlew runClient` starts a dev client.
+The jar ends up in `build/libs/`, for example `lightskies-utils-1.0.0+mc26.2.jar`. Put it in `.minecraft/mods` next to the matching Fabric API. `./gradlew runClient -Pmc_target=26.2` starts a dev client for that version.
+
+GitHub Actions builds both versions on every push. Download the jars from the run's artifacts: `lightskies-utils-mc26.2` and `lightskies-utils-mc26.3`.
+
+**Adding another version:** copy one of the files in `versions/`, set the Minecraft/Loader/Fabric API versions from https://fabricmc.net/develop, and add the version to the matrix in `.github/workflows/build.yml`.
 
 ### Notes for whoever compiles it first
 

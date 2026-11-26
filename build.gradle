@@ -2,22 +2,37 @@ plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
+// Load the per-version settings (Minecraft, Fabric Loader, Fabric API) from versions/<mc_target>.properties
+def mcTarget = project.property('mc_target').toString()
+def versionFile = file("versions/${mcTarget}.properties")
+if (!versionFile.exists()) {
+	throw new GradleException("No versions/${mcTarget}.properties - supported: " +
+			file('versions').list().findAll { it.endsWith('.properties') }.collect { it - '.properties' }.sort().join(', '))
+}
+def mc = new Properties()
+versionFile.withInputStream { mc.load(it) }
+
 base {
 	archivesName = 'lightskies-utils'
 }
+version = "${project.version}+mc${mcTarget}"
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	minecraft "com.mojang:minecraft:${mc.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${mc.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${mc.fabric_api_version}"
 }
 
 processResources {
-	def version = project.version
-	inputs.property "version", version
+	def props = [
+			version             : project.version.toString(),
+			minecraft_dependency: mc.minecraft_dependency.toString(),
+			loader_version      : mc.loader_version.toString()
+	]
+	inputs.properties props
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version
+		expand props
 	}
 }
 
