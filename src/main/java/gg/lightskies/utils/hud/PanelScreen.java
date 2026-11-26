@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 
 import gg.lightskies.utils.LightSkiesUtils;
 import gg.lightskies.utils.config.DataStore;
@@ -284,7 +283,7 @@ public final class PanelScreen extends Screen {
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		// The same key that opens the panel also closes it.
-		if (KeyMappingHelper.isActiveAndMatches(LightSkiesUtils.openPanelKey(), event)) {
+		if (LightSkiesUtils.openPanelKey().matches(event)) {
 			this.onClose();
 			return true;
 		}
